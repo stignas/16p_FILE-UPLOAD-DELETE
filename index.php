@@ -27,12 +27,12 @@
     <button type="submit">Upload</button>
 </form>
 <hr>
-<!-- Atvaizduojam įkeltų failų sąrašą.-->
+<!-- Atvaizduojam gautą pranešimą iš submit.php ar delete.php-->
 <?php if (isset($_GET['message'])): ?>
     <h3> <?= $_GET['message'] ?></h3>
 <?php endif;
 unset($_GET['message']); ?>
-
+<!-- Atvaizduojam įkeltų failų sąrašą.-->
 <table>
     <tr>
         <th>Original file name</th>
