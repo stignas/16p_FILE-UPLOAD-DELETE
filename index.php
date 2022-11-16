@@ -2,9 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>File upload, list, delete</title>
 </head>
-<?php $metadatafile = json_decode(file_get_contents('./data/metadata.json'), true); ?>
+<!-- Nuskaitom duomenų failą į duomenų masyvą -->
+<?php $metadatafile = json_decode(file_get_contents('./data/metadata.json'), true);?>
+<!-- Pastilizuojam failų sąrašo lentelę-->
 <style>
     table, tr, td, th {
         text-align: center;
@@ -14,6 +16,7 @@
     }
 </style>
 <body>
+<!-- Sukuriam formą failų įkėlimui-->
 <form
         action="submit.php"
         method="POST"
@@ -22,8 +25,13 @@
     <input type="file" name="my_file">
     <button type="submit">Upload</button>
 </form>
-
 <hr>
+<!-- Atvaizduojam įkeltų failų sąrašą.-->
+<?php if(isset($_GET['message'])): ?>
+    <h3> <?=$_GET['message']?></h3>
+<?php endif;
+unset($_GET['message']);
+?>
 <table>
     <tr>
         <th>Original file name</th>
@@ -32,13 +40,14 @@
         <th>Delete File</th>
 
     </tr>
-    <?php if (!empty($metadatafile)): ?>
-        <?php foreach ($metadatafile as $index => $fileInfo): ?>
+    <?php if (!empty($metadatafile)): ?> <!-- Patikrinam ar failas nėra tuščias   -->
+        <?php foreach ($metadatafile as $index => $fileInfo): ?>  <!--  Nuskaitom kiekvieną įrašą iš failo ir sukuriam kiekvienam įrašui eilutę lentelėje -->
             <tr>
-                <td><?= $fileInfo['filename'] ?></td>
-                <td><?= round($fileInfo['filesize']/1024,2) ?></td>
-                <td><?= $fileInfo['uploadedAt'] ?></td>
+                <td><?= $fileInfo['filename'] ?></td>  <!-- Atvaizduojam originalų failo pavadinimą   -->
+                <td><?= round($fileInfo['filesize']/1024,2) ?></td> <!-- Failo dydį suapvalinę atvaizduojame KB  -->
+                <td><?= $fileInfo['uploadedAt'] ?></td> <!--  Atvaizduojam įkėlimo datą ir laiką  -->
                 <td>
+                    <!--  Sukuriam formą ir mygtuką failo ištrynimui  -->
                     <form action="delete.php" method="post">
                         <button type="submit"><input type="hidden" name="id" value="<?= $index ?>">Delete</button>
                     </form>
@@ -49,3 +58,4 @@
 </table>
 </body>
 </html>
+<?php unset($_GET['message']);?>
