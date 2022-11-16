@@ -25,6 +25,7 @@ if ($error !== UPLOAD_ERR_OK || !in_array(pathinfo($uploadFileName, PATHINFO_EXT
     header('Location: /paskaitos/forms/16p_pvz/index.php?message=File successfully uploaded.');
 }
 
+// Funkcija įkeliamo failo metaduomenims surašyt į json.
 function writeMeta($filename, $filesize, $filesavepath): void
 {
     $metadata = json_decode(file_get_contents('./data/metadata.json'), true);
