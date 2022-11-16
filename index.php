@@ -5,7 +5,7 @@
     <title>File upload, list, delete</title>
 </head>
 <!-- Nuskaitom duomenų failą į duomenų masyvą -->
-<?php $metadatafile = json_decode(file_get_contents('./data/metadata.json'), true);?>
+<?php $metadatafile = json_decode(file_get_contents('./data/metadata.json'), true); ?>
 <!-- Pastilizuojam failų sąrašo lentelę-->
 <style>
     table, tr, td, th {
@@ -15,6 +15,7 @@
         border-collapse: collapse;
     }
 </style>
+
 <body>
 <!-- Sukuriam formą failų įkėlimui-->
 <form
@@ -27,24 +28,23 @@
 </form>
 <hr>
 <!-- Atvaizduojam įkeltų failų sąrašą.-->
-<?php if(isset($_GET['message'])): ?>
-    <h3> <?=$_GET['message']?></h3>
+<?php if (isset($_GET['message'])): ?>
+    <h3> <?= $_GET['message'] ?></h3>
 <?php endif;
-unset($_GET['message']);
-?>
+unset($_GET['message']); ?>
+
 <table>
     <tr>
         <th>Original file name</th>
         <th>File Size, KB</th>
         <th>Uploaded At:</th>
         <th>Delete File</th>
-
     </tr>
     <?php if (!empty($metadatafile)): ?> <!-- Patikrinam ar failas nėra tuščias   -->
         <?php foreach ($metadatafile as $index => $fileInfo): ?>  <!--  Nuskaitom kiekvieną įrašą iš failo ir sukuriam kiekvienam įrašui eilutę lentelėje -->
             <tr>
                 <td><?= $fileInfo['filename'] ?></td>  <!-- Atvaizduojam originalų failo pavadinimą   -->
-                <td><?= round($fileInfo['filesize']/1024,2) ?></td> <!-- Failo dydį suapvalinę atvaizduojame KB  -->
+                <td><?= round($fileInfo['filesize'] / 1024, 2) ?></td> <!-- Failo dydį suapvalinę atvaizduojame KB  -->
                 <td><?= $fileInfo['uploadedAt'] ?></td> <!--  Atvaizduojam įkėlimo datą ir laiką  -->
                 <td>
                     <!--  Sukuriam formą ir mygtuką failo ištrynimui  -->
@@ -56,6 +56,7 @@ unset($_GET['message']);
         <?php endforeach; ?>
     <?php endif ?>
 </table>
+
 </body>
 </html>
-<?php unset($_GET['message']);?>
+
