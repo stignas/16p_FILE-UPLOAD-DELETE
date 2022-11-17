@@ -1,16 +1,34 @@
 <?php
+const INDEX_PATH = '/paskaitos/forms/16p_pvz/index.php';
+$message = null;
+
 if (isset($_POST['filepath'])) {
     $file = $_POST['filepath'];
     if (file_exists($file)) {
-        header('Content-Type: application/actet-stream');
-        header('Content-Disposition: attachment; filename="' . basename($file) . '"');
-        header('Content-Length:' . filesize($file));
-        readfile($file);
-        die;
+        downloadFile($file);
     } else {
-        header('Location: /paskaitos/forms/16p_pvz/index.php?message=File does not exist.');
+        $message = 'File does not exist.';
     }
 } else {
-    header('Location: /paskaitos/forms/16p_pvz/index.php?message=Filename is not defined.');
+    $message = 'Filename is not defined.';
 }
 
+if (isset($message)) {
+    setHeader($message);
+}
+
+
+// FUNKCIJOS -------------------------------
+
+function downloadFile($filepath): void
+{
+    header('Content-Type: application/actet-stream');
+    header('Content-Disposition: attachment; filename="' . basename($filepath) . '"');
+    header('Content-Length:' . filesize($filepath));
+    readfile($filepath);
+}
+
+function setHeader(string $msg, string $path = INDEX_PATH): void
+{
+    header('Location: ' . $path . '?message=' . $msg);
+}

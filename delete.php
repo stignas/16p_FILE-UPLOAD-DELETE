@@ -1,17 +1,36 @@
 <?php
-$fileList = json_decode(file_get_contents('./data/metadata.json'), true);
-$index = intval($_POST['id']);
-unset($_GET['message']);
+const INDEX_PATH = '/paskaitos/forms/16p_pvz/index.php';
 
-// patikrinam ar failas egzistuoja ir ji ištrinam iš saugyklos ir metadata failo.
-// nusiunčiam žinutę į index.php kaip pavyko
-if (isset($fileList[$index])) {
-    $fileToDelete = $fileList[$index]['filepath'];
-    unlink($fileToDelete);
-    unset($fileList[$index]);
-    file_put_contents('./data/metadata.json', json_encode(array_values($fileList), JSON_PRETTY_PRINT));
-    header('Location: /paskaitos/forms/16p_pvz/index.php?message=File successfully deleted.');
+$fileData = json_decode(file_get_contents('./data/metadata.json'), true);
+$index = intval($_POST['id']);
+
+
+if (isset($fileData[$index])) {
+    $message = null;
+    if(deleteFile($fileData, $index)) {
+        $message = 'File deleted.';
+    }
 } else {
-    header('Location: /paskaitos/forms/16p_pvz/index.php?message=File does not exist.');
+    $message = 'File does not exist.';
+}
+setHeader($message);
+
+
+// FUNKCIJOS ------------------------------------------------------------------------------------
+
+function deleteFile(array $metadata, int $i): bool
+{
+    if (unlink($metadata[$i]['filepath'])) {
+        unset($metadata[$i]);
+        file_put_contents('./data/metadata.json', json_encode(array_values($metadata), JSON_PRETTY_PRINT));
+        return true;
+    } else {
+        return false;
+    }
+}
+
+function setHeader(string $msg, string $path = INDEX_PATH): void
+{
+    header('Location: ' . $path . '?message=' . $msg);
 }
 

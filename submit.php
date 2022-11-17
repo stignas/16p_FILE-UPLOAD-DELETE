@@ -1,45 +1,76 @@
 <?php
-// Paleidžiam funkciją, kuri patikrina ar neviršytas POST limitas.
-postErrHandler();
-// Sudedam į kintamuosius informaciją apie įkeliamą failą.
-$error = $_FILES['my_file']['error'];
-$fileSize = $_FILES['my_file']['size'];
-$fileType = $_FILES['my_file']['type'];
-$uploadFileName = $_FILES['my_file']['name'];
-$fileSavePath = './data/' . uniqid() . '_' . $uploadFileName;
-$tempFilePath = $_FILES['my_file']['tmp_name'];
-// Apsirašom įkeliamo failo limitus: leidžiami failo tipai ir max dydis 1MB.
+
 const FILETYPES_ALLOWED = array('JPEG', 'PNG', 'JPG');
 const MAX_FILESIZE_ALLOWED = 1048576;
-unset($_GET['message']);
+const INDEX_PATH = '/paskaitos/forms/16p_pvz/index.php';
 
-// Patikrinam ar įkėlimo metu neįvyko klaidų ir ar atitinka failo tipo ir dydžio limitus.
-if ($error !== UPLOAD_ERR_OK || !in_array(pathinfo($uploadFileName, PATHINFO_EXTENSION), FILETYPES_ALLOWED) || $fileSize > MAX_FILESIZE_ALLOWED ) {
-//  Užsetinam $_GET['message], kad galėtume index.php atvaizduoti žinutę.
-    header('Location: /paskaitos/forms/16p_pvz/index.php?message=Error uploading file. Only *.png, *.jpg files below 1MB allowed.');
-    die();
-} else {
-// Jei klaidų nėra, įkeliam failus, padarom įrašą su failo metadata.
-    move_uploaded_file($tempFilePath, $fileSavePath);
-    writeMeta($uploadFileName, $fileSize, $fileSavePath);
-    header('Location: /paskaitos/forms/16p_pvz/index.php?message=File successfully uploaded.');
+$fileSavePath = './data/' . uniqid() . '_' . $_FILES['my_file']['name'];
+$tempFilePath = $_FILES['my_file']['tmp_name'];
+
+// Paleidžiam klaidų tikrinimo funkcijas.
+postErrHandler();
+$errors = errorHandling($_FILES);
+
+// Jei yra klaidų, paruošiam žinutę.
+if (!empty($errors)) {
+    $message = null;
+    foreach ($errors as $error) {
+        $message .= $error . " ";
+    }
+    if (isset($message)) {
+        setHeader($message);
+    }
+    die;
 }
 
-// Funkcija įkeliamo failo metaduomenims surašyt į json.
-function writeMeta($filename, $filesize, $filesavepath): void
+
+if (move_uploaded_file($tempFilePath, $fileSavePath)) {
+    writeMeta($_FILES, $fileSavePath);
+    $message = 'File successfully uploaded.';
+}
+else{
+    $message = "Unknown error occured";
+}
+setHeader($message);
+
+
+// FUNKCIJOS ------------------------------------------------------------
+
+function errorHandling(array $file, array $allowedTypes = FILETYPES_ALLOWED): array
+{
+    $errorMessages = [];
+    if ($file['my_file']['error'] !== UPLOAD_ERR_OK) {
+        $errorMessages[] = 'Error occured: ' . $file["my_file"]["error"];
+//        header('Location: /paskaitos/forms/16p_pvz/index.php?message=Error occured: ' . $file["my_file"]["error"]);
+    }
+    if (!in_array(pathinfo($file['my_file']['name'], PATHINFO_EXTENSION), $allowedTypes) || $file['my_file']['size'] > MAX_FILESIZE_ALLOWED) {
+        $errorMessages[] = 'Only *.png, *.jpg files below 1MB allowed.';
+//        header('Location: /paskaitos/forms/16p_pvz/index.php?message=Only *.png, *.jpg files below 1MB allowed.');
+    }
+
+    return $errorMessages;
+}
+
+function setHeader(string $msg, string $path=INDEX_PATH): void
+{
+    header('Location: '.$path. '?message=' . $msg);
+}
+
+function writeMeta(array $file, string $path): void
 {
     $metadata = json_decode(file_get_contents('./data/metadata.json'), true);
     if (empty($metadata)) {
         $metadata = [];
     }
     $metadata[] = [
-        'filename' => $filename,
-        'filesize' => $filesize,
-        'filepath' => $filesavepath,
+        'filename' => $file['my_file']['name'],
+        'filesize' => $file['my_file']['size'],
+        'filepath' => $path,
         'uploadedAt' => date('Y-m-d H:i:s'),
     ];
     file_put_contents('./data/metadata.json', json_encode($metadata, JSON_PRETTY_PRINT));
 }
+
 // Funkcija POST klaidos handlinimui, jeigu bandome ikelti didesni faila negu PHP serverio nustatymuose
 function postErrHandler(): void
 {
