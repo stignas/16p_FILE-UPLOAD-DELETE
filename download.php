@@ -9,7 +9,7 @@ if (file_exists($file)) {
     readfile($file);
     die;
 } else {
-    die('File does not exist.');
+    header('Location: /paskaitos/forms/16p_pvz/index.php?message=File does not exist.');
 }
 
 
