@@ -47,11 +47,18 @@ unset($_GET['message']); ?>
                 <td><?= round($fileInfo['filesize'] / 1024, 2) ?></td> <!-- Failo dydį suapvalinę atvaizduojame KB  -->
                 <td><?= $fileInfo['uploadedAt'] ?></td> <!--  Atvaizduojam įkėlimo datą ir laiką  -->
                 <td>
+                    <form method="post" action="download.php">
+                        <button><input type="hidden" name="filepath" value="<?= $fileInfo['filepath'] ?>">Download
+                        </button>
+                    </form>
+                </td>
+                <td>
                     <!--  Sukuriam formą ir mygtuką failo ištrynimui  -->
                     <form action="delete.php" method="post">
                         <button type="submit"><input type="hidden" name="id" value="<?= $index ?>">Delete</button>
                     </form>
                 </td>
+
             </tr>
         <?php endforeach; ?>
     <?php endif ?>
